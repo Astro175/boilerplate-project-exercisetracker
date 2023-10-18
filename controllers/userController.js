@@ -61,8 +61,9 @@ res.status(200).json({
     
 const getLog = async (req, res) => {
     const { _id } = req.params;
+    const { from, to, limit } = req.query;
     console.log(_id);
-
+    
     if (!_id) {
         return res.status(400).json({error: 'All fields must be filled'});
     }
@@ -71,6 +72,27 @@ const getLog = async (req, res) => {
         return res.status(400).json({error: 'User does not exist'});
     }
     const count = user.exercises.length;
+    
+
+    if(from && to && limit) {
+       const fromDate = new Date(from);
+        const toDate = new Date(to);
+
+        const filteredLogs = user.exercises.filter(log => {
+            const logDate = new Date(log.date);
+            return logDate >= fromDate && logDate <= toDate;
+        });
+
+        const limitedLogs = filteredLogs.slice(0, limit);
+
+        return res.status(200).json({
+            _id,
+            username: user.username,
+            count: limitedLogs.length,
+            log: limitedLogs
+        });
+    }
+
     res.status(200).json({
         _id,
         username: user.username,
